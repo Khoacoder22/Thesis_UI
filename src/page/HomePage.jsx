@@ -1,12 +1,13 @@
 import Sidebar from "../components/Sidebar";
+import ProjectPage from "../page/ProjectPage";
 
 const HomePage = () => {
-    return (
-        <div className="flex">
-            <Sidebar />
-            <div className="p-7 text-3xl font-semibold flex-1 h-screen">Home Page</div>
-        </div>
-    )
-}
+  return (
+    <div className="flex">
+      <Sidebar />
+      <ProjectPage />
+    </div>
+  );
+};
 
 export default HomePage;

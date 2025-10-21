@@ -18,9 +18,9 @@ const Login = () => {
         {/* Logo */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-extrabold text-indigo-600 tracking-wide">
-            QR Queue
+            QR Smart Queue
           </h1>
-          <p className="text-gray-500 mt-1">Đăng nhập để tiếp tục</p>
+          <p className="text-black-500 mt-1">Login for countinue</p>
         </div>
 
         {/* Form */}
