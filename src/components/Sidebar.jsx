@@ -1,10 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { LayoutDashboard, FolderKanban, Users, ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(true);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Lấy user từ localStorage khi component mount
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   const menus = [
     { title: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/dashboard" },
@@ -76,12 +85,16 @@ const Sidebar = () => {
             alt="User Avatar"
             className="w-10 h-10 rounded-full border-2 border-white"
           />
-          {open && (
+           {open && (
             <div>
-              <h3 className="font-semibold text-sm">John Doe</h3>
-              <p className="text-xs text-white/80">Super Admin</p>
-            </div>
-          )}
+              <h3 className="font-semibold text-sm">
+                {user ? user.name : "Guest"}
+              </h3>
+              <p className="text-xs text-white/80">
+                {user ? user.role || "User" : ""}
+          </p>
+        </div>
+  )}
         </div>
       </div>
     </div>
