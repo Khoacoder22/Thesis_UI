@@ -11,7 +11,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDeult();
+    e.preventDefault();
     setError("");
     setLoading(true);
 
@@ -80,7 +80,7 @@ const Login = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPasswo(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
                 placeholder="••••••••"
