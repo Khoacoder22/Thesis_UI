@@ -12,7 +12,7 @@ const UserPage = () => {
     u.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Xử lý thêm user
+  // handle uer
   const handleAddUser = (e) => {
     e.preventDefault();
     if (!newUser.name || !newUser.email || !newUser.role) return;

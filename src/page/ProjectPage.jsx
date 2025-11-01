@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const API_URL = "http://localhost:3000/api/projects";
+const API_URL = `${process.env.REACT_APP_API_URL}/projects`;
 
 const ProjectPage = () => {
   const [search, setSearch] = useState("");
   const [projects, setProjects] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ name: "", description: "" });
+  const [editMode, setEditMode] = useState(false);
+  const [editId, setEditId] = useState(null);
 
   // Pagination state
   const [pagination, setPagination] = useState({
@@ -16,12 +20,10 @@ const ProjectPage = () => {
     hasPrev: false,
   });
 
-  // Fetch projects when page OR search changes
   useEffect(() => {
     fetchProjects(pagination.page, search);
   }, [pagination.page, search]);
 
-  // Function fetch project list
   const fetchProjects = async (page = 1, keyword = "") => {
     try {
       const token = localStorage.getItem("token");
@@ -39,7 +41,7 @@ const ProjectPage = () => {
       );
 
       if (res.status === 401 || res.status === 403) {
-        alert("Invalid role or your token expired. Please login again!");
+        toast.error("Invalid role or your token expired. Please login again!");
         return;
       }
 
@@ -54,19 +56,25 @@ const ProjectPage = () => {
       });
     } catch (err) {
       console.error("Error fetching projects:", err);
+      toast.error("Failed to load projects.");
     }
   };
 
-  // Save new project
+  //Fetch save 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim()) return alert("Please enter project name!");
+    if (!formData.name.trim()) {
+      toast.warn("Please enter project name!");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    const method = editMode ? "PATCH" : "POST";
+    const url = editMode ? `${API_URL}/${editId}` : API_URL;
 
     try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(API_URL, {
-        method: "POST",
+      const res = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -77,18 +85,65 @@ const ProjectPage = () => {
         }),
       });
 
-      if (res.status === 201) {
+      if (res.ok) {
         fetchProjects(pagination.page, search);
         setFormData({ name: "", description: "" });
         setShowForm(false);
+        setEditMode(false);
+        setEditId(null);
+        toast.success(editMode ? "Project updated successfully!" : "Project created successfully!");
       } else if (res.status === 401 || res.status === 403) {
-        alert("Invalid role or your token expired. Please login again!");
+        toast.error("Invalid role or your token expired. Please login again!");
       } else {
+        //Get json error and notification
         const errText = await res.text();
-        alert("Error: " + res.status + " " + errText);
+        //Notification error
+        try {
+          const errObj = JSON.parse(errText);
+          toast.error(` ${errObj.message || "Unknown error"}`);
+        } catch {
+          toast.error(`Error ${res.status}: ${errText}`);
+        }
       }
     } catch (err) {
-      console.error("Project:", err);
+      console.error("Project save error:", err);
+      toast.error("Network error while saving project!");
+    }
+  };
+
+  const handleEditClick = (project) => {
+    setEditMode(true);
+    setEditId(project.id);
+    setFormData({ name: project.name, description: project.description });
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id) => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        fetchProjects(pagination.page, search);
+        toast.success("Project deleted successfully!");
+      } else {
+        const errText = await res.text();
+        try {
+          const errObj = JSON.parse(errText);
+          toast.error(`Error ${res.status}: ${errObj.message || "Unknown error"}`);
+        } catch {
+          toast.error(`Error ${res.status}: ${errText}`);
+        }
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      toast.error("Network error while deleting project!");
     }
   };
 
@@ -105,20 +160,24 @@ const ProjectPage = () => {
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-              setPagination((prev) => ({ ...prev, page: 1 })); // reset to page 1 when you search
+              setPagination((prev) => ({ ...prev, page: 1 }));
             }}
             className="border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none w-full sm:w-64"
           />
 
           <button
-            onClick={() => setShowForm(true)}
+            onClick={() => {
+              setEditMode(false);
+              setFormData({ name: "", description: "" });
+              setShowForm(true);
+            }}
             className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
           >
             + New Project
           </button>
         </div>
 
-        {/* List projects */}
+        {/* Project list */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {projects.length > 0 ? (
             projects.map((p) => (
@@ -126,16 +185,30 @@ const ProjectPage = () => {
                 key={p.id}
                 className="bg-white rounded-xl shadow-sm p-4 border border-gray-200 hover:shadow-md hover:-translate-y-1 transition-all duration-200"
               >
-                <h3 className="text-base font-semibold text-indigo-700 truncate">
-                  {p.name}
-                </h3>
-                <p className="text-gray-600 mt-1 text-sm line-clamp-2">
-                  {p.description}
-                </p>
-                <p className="text-gray-400 text-xs mt-3 flex items-center gap-1">
-                  <span>📅</span>{" "}
-                  {new Date(p.created_at).toLocaleString("en-GB")}
-                </p>
+                <h3 className="text-base font-semibold text-indigo-700 truncate">{p.name}</h3>
+                <p className="text-gray-600 mt-1 text-sm line-clamp-2">{p.description}</p>
+
+                <div className="flex items-center justify-between mt-3 text-xs text-gray-400">
+                  <div className="flex items-center gap-1">
+                    <span>📅</span>
+                    <span>{new Date(p.created_at).toLocaleString("en-GB")}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleEditClick(p)}
+                      className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded-md font-medium transition"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(p.id)}
+                      className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md font-medium transition"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
               </div>
             ))
           ) : (
@@ -179,12 +252,12 @@ const ProjectPage = () => {
         </div>
       </div>
 
-      {/* Create Project Form */}
+      {/* Form */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md">
             <h3 className="text-xl font-bold text-indigo-600 mb-4">
-              Create Project
+              {editMode ? "Edit Project" : "Create Project"}
             </h3>
 
             <form onSubmit={handleSave} className="space-y-4">
@@ -219,7 +292,11 @@ const ProjectPage = () => {
               <div className="flex justify-end gap-3 mt-4">
                 <button
                   type="button"
-                  onClick={() => setShowForm(false)}
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditMode(false);
+                    setEditId(null);
+                  }}
                   className="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400 text-gray-700"
                 >
                   Cancel
@@ -235,6 +312,9 @@ const ProjectPage = () => {
           </div>
         </div>
       )}
+
+      {/* Toast container */}
+      <ToastContainer position="top-right" autoClose={3000} theme="colored" />
     </div>
   );
 };

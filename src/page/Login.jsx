@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ import
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify"; 
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -7,16 +8,16 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDeult();
     setError("");
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/api/auth/login", { 
+      //lưu trên cookie
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/login`, { 
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -27,20 +28,18 @@ const Login = () => {
 
       const data = await res.json();
 
-      //lưu token trên local store
       if (res.ok && data.status === "success") {
         localStorage.setItem("user", JSON.stringify(data.data.user));
         localStorage.setItem("token", data.data.token); 
 
-        alert("Login thành công!");
+        toast.success("Login Successfull!"); 
 
         navigate("/dashboard", { replace: true });
       } else {
-        setError(data.message || "Login failed");
+        toast.error(data.message || "Login failed!"); 
       }
     } catch (err) {
-        setError("Đăng nhập thất bại: " + err.message);
-        setLoading(false);
+      toast.error("Fail to connect server: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -57,6 +56,8 @@ const Login = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* ... phần input giữ nguyên ... */}
+            <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -73,13 +74,13 @@ const Login = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mật khẩu
+              Password
             </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => setPasswo(e.target.value)}
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
                 placeholder="••••••••"
@@ -95,13 +96,13 @@ const Login = () => {
           </div>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
-
+        </form>
           <button
             type="submit"
             disabled={loading}
             className="w-full bg-indigo-600 text-white font-semibold py-2 rounded-xl hover:bg-indigo-700 transition duration-300"
           >
-            {loading ? "Đang đăng nhập..." : "Login"}
+            {loading ? "Login...." : "Login"}
           </button>
         </form>
       </div>

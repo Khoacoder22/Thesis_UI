@@ -4,6 +4,8 @@ import Sidebar from "./components/Sidebar";
 import DashboardPage from "./page/DashboardPage";
 import ProjectPage from "./page/ProjectPage";
 import UserPage from "./page/UserPage";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Layout = () => {
   const location = useLocation();
@@ -22,6 +24,7 @@ const Layout = () => {
           <Route path="/user" element={<UserPage />} />
           <Route path="/login" element={<Login />} />
         </Routes>
+        <ToastContainer position="top-right" autoClose={3000} />
       </div>
     </div>
   );
