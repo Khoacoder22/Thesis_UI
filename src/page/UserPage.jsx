@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import SearchBar from "../components/SearchbarComponent";
 
 const UserPage = () => {
   // 👉 Bỏ user mẫu, để trống ban đầu
@@ -27,21 +28,18 @@ const UserPage = () => {
       <div className="flex justify-between items-center mb-6">
 
         <h1 className="text-2xl font-bold text-indigo-600">Users</h1>
+
+        <div className="flex-1 flex justify-center">
+          <SearchBar
+            value={search}
+            onChange={(val) => setSearch(val)}
+          />
+        </div>
         
         <button onClick={() => setShowForm(!showForm)} className="bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition">
           + Add User
         </button>
       </div>
-
-      {/* Search */}
-      {/* để sau  */}
-      <input
-        type="text"
-        placeholder="Search user by name..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full px-4 py-2 mb-6 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-      />
 
       {/* Form Add User */}
       {showForm && (

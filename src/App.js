@@ -10,13 +10,14 @@ import "react-toastify/dist/ReactToastify.css";
 const Layout = () => {
   const location = useLocation();
 
-  // Ẩn sidebar khi ở trang login
+  //  login
   const hideSidebar = location.pathname === "/login";
 
   return (
     <div className="flex">
       {!hideSidebar && <Sidebar />}
       <div className="flex-1 bg-gray-50 min-h-screen">
+
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
@@ -24,7 +25,8 @@ const Layout = () => {
           <Route path="/user" element={<UserPage />} />
           <Route path="/login" element={<Login />} />
         </Routes>
-        <ToastContainer position="top-right" autoClose={3000} />
+        
+        <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       </div>
     </div>
   );
@@ -34,6 +36,7 @@ const App = () => {
   return (
     <Router>
       <Layout />
+      <ToastContainer position="top-right" autoClose={3000} theme="colored" />
     </Router>
   );
 };

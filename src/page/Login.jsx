@@ -1,63 +1,53 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify"; 
+import { toast } from "react-toastify";
+import authAPI from "../axios/authAPI"; 
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
-      //lưu trên cookie
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/login`, { 
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      });
+      //gọi api login
+      const res = await authAPI.login(email, password);
+      const data = res.data;
 
-      const data = await res.json();
-
-      if (res.ok && data.status === "success") {
+      if (data.status === "success") {
+        localStorage.setItem("token", data.data.token);
         localStorage.setItem("user", JSON.stringify(data.data.user));
-        localStorage.setItem("token", data.data.token); 
-
-        toast.success("Login Successfull!"); 
 
         navigate("/dashboard", { replace: true });
       } else {
-        toast.error(data.message || "Login failed!"); 
+        toast.error(data.message || "Invalid email or password!");
       }
     } catch (err) {
-      toast.error("Fail to connect server: " + err.message);
+      console.error("Login error:", err);
+      toast.error(err.response?.data?.message || "Cannot connect to server!");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-blue-500 to-cyan-400">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+  <div className="min-h-screen flex items-center justify-center 
+        bg-gradient-to-r from-indigo-600 via-blue-500 to-cyan-400
+    bg-[length:400%_400%] animate-gradientMove">     
+   <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-extrabold text-indigo-600 tracking-wide">
             QR Smart Queue
           </h1>
-          <p className="text-black-500 mt-1">Login to continue</p>
+          <p className="text-gray-500 mt-1">Login to continue</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* ... phần input giữ nguyên ... */}
-            <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -95,14 +85,12 @@ const Login = () => {
             </div>
           </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-        </form>
           <button
             type="submit"
             disabled={loading}
             className="w-full bg-indigo-600 text-white font-semibold py-2 rounded-xl hover:bg-indigo-700 transition duration-300"
           >
-            {loading ? "Login...." : "Login"}
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>
