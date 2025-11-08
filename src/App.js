@@ -5,6 +5,8 @@ import DashboardPage from "./page/DashboardPage";
 import ProjectPage from "./page/ProjectPage";
 import UserPage from "./page/UserPage";
 import { ToastContainer } from "react-toastify";
+import Staff from "./page/Staff";
+import Profile from "./page/profile";
 import "react-toastify/dist/ReactToastify.css";
 
 const Layout = () => {
@@ -24,9 +26,9 @@ const Layout = () => {
           <Route path="/project" element={<ProjectPage />} />
           <Route path="/user" element={<UserPage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/staff" element={<Staff/>} />
+          <Route path="/profile" element={<Profile/>}/>
         </Routes>
-        
-        <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       </div>
     </div>
   );

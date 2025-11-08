@@ -1,107 +1,240 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import SearchBar from "../components/SearchbarComponent";
+import userApi from "../axios/userAPI";
+import projectApi from "../axios/projectAPI";
+import { toast } from "react-toastify";
 
 const UserPage = () => {
-  // 👉 Bỏ user mẫu, để trống ban đầu
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [newUser, setNewUser] = useState({ name: "", email: "", role: "" });
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editUser, setEditUser] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // Lọc danh sách user
-  const filteredUsers = users.filter((u) =>
-    u.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const [projectSearch, setProjectSearch] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [allProjects, setAllProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
 
-  // handle uer
-  const handleAddUser = (e) => {
-    e.preventDefault();
-    if (!newUser.name || !newUser.email || !newUser.role) return;
-    setUsers([...users, { id: Date.now(), ...newUser }]);
-    setNewUser({ name: "", email: "", role: "" });
-    setShowForm(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    hasNext: false,
+    hasPrev: false,
+  });
+
+  const [newUser, setNewUser] = useState({
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+  });
+
+  const dropdownRef = useRef(null);
+
+  const fetchUsers = async (page = 1, keyword = "") => {
+  try {
+    setLoading(true);
+    const res = await userApi.getAll(page, keyword);
+    let users = res.data?.data || [];
+
+    users = await Promise.all(users.map(async (u) => {
+      if (u.project_id && !u.project) {
+        try {
+          const p = await projectApi.getById(u.project_id);
+          return { ...u, project: p.data?.data?.name || null };
+        } catch {
+          return u;
+        }
+      }
+      return u;
+    }));
+
+    setUsers(users);
+
+    if (res.data?.pagination) setPagination(res.data.pagination);
+  } catch (error) {
+    console.error("Failed to fetch users:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  useEffect(() => {
+    fetchUsers(pagination.page, search);
+  }, [pagination.page, search]);
+
+  const handleSearchChange = (val) => {
+    setSearch(val);
+    setPagination((prev) => ({ ...prev, page: 1 }));
   };
+
+  const loadProjects = async () => {
+    try {
+      const res = await projectApi.getUnassigned(projectSearch);
+      setAllProjects(res.data?.data?.projects || []);
+    } catch (err) {
+      console.log("LOAD PROJECTS ERROR:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const t = setTimeout(loadProjects, 250);
+    return () => clearTimeout(t);
+  }, [projectSearch, dropdownOpen]);
+
+  const handleAddUser = async (e) => {
+    e.preventDefault();
+    try {
+      await userApi.createAdmin(newUser);
+      await fetchUsers();
+      setShowCreateForm(false);
+      setNewUser({ name: "", email: "", password: "", phone: "" });
+      toast.success("Created successfully!");
+    } catch (error) {
+      const msg = error.response?.data?.message || "Create failed!";
+      toast.error(msg);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Delete this admin?")) return;
+    try {
+      await userApi.deleteUser(editUser.id);
+      await fetchUsers();
+      setEditUser(null);
+      toast.success("Deleted!");
+    } catch {
+      toast.error("Delete failed!");
+    }
+  };
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+    try {
+      await userApi.update(editUser.id, editUser);
+
+      if (selectedProject) {
+        await projectApi.assignToUser(editUser.id, selectedProject.name);
+      }
+
+      await fetchUsers();
+      setEditUser(null);
+      toast.success("Updated successfully!");
+    } catch (err) {
+      console.error("Save error:", err);
+      toast.error("Update failed!");
+    }
+  };
+
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, []);
 
   return (
     <div className="p-8 w-full">
-      {/* Header */}
       <div className="flex justify-between items-center mb-6">
-
-        <h1 className="text-2xl font-bold text-indigo-600">Users</h1>
-
+        <h1 className="text-2xl font-bold text-indigo-600">Admins</h1>
         <div className="flex-1 flex justify-center">
-          <SearchBar
-            value={search}
-            onChange={(val) => setSearch(val)}
-          />
+          <SearchBar value={search} onChange={handleSearchChange} />
         </div>
-        
-        <button onClick={() => setShowForm(!showForm)} className="bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition">
-          + Add User
+        <button
+          onClick={() => { setShowCreateForm(true); setEditUser(null); }}
+          className="bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700"
+        >
+          + Add Admin
         </button>
       </div>
 
-      {/* Form Add User */}
-      {showForm && (
-        <form
-          onSubmit={handleAddUser}
-          className="bg-white p-6 rounded-xl shadow-md mb-6 border border-gray-200 space-y-4"
-        >
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-            <input
-              type="text"
-              value={newUser.name}
-              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-              className="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-              placeholder="Enter full name"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={newUser.email}
-              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-              className="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-              placeholder="you@example.com"
-            />
-          </div>
+      {/* CREATE USER */}
+      {showCreateForm && !editUser && (
+        <form onSubmit={handleAddUser} className="bg-white p-6 rounded-xl shadow-md border mb-6 space-y-4">
+          <h2 className="font-bold text-lg">Add Admin</h2>
 
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-xl font-semibold hover:bg-indigo-700 transition"
-          >
-            Save User
-          </button>
+          <input className="border p-2 rounded w-full" placeholder="Name" value={newUser.name} onChange={(e) =>
+            setNewUser({ ...newUser, name: e.target.value })} />
+
+          <input className="border p-2 rounded w-full" placeholder="Email" value={newUser.email} onChange={(e) =>
+            setNewUser({ ...newUser, email: e.target.value })} />
+
+          <input type="password" className="border p-2 rounded w-full" placeholder="Password" value={newUser.password} onChange={(e) =>
+            setNewUser({ ...newUser, password: e.target.value })} />
+
+          <input className="border p-2 rounded w-full" placeholder="Phone" value={newUser.phone} onChange={(e) =>
+            setNewUser({ ...newUser, phone: e.target.value })} />
+
+          <div className="flex gap-3 mt-4">
+            <button className="bg-indigo-600 text-white px-4 py-2 rounded">Create</button>
+            <button type="button" className="px-4 py-2 rounded border" onClick={() => {
+              setShowCreateForm(false);
+              setNewUser({ name: "", email: "", password: "", phone: "" });
+            }}>
+              Cancel
+            </button>
+          </div>
         </form>
       )}
 
-      {/* Danh sách User */}
-      <div className="grid gap-4">
-        {filteredUsers.map((user) => (
-          <div
-            key={user.id}
-            className="bg-white rounded-xl shadow-sm p-4 border border-gray-200 flex justify-between items-center"
-          >
-            <div>
-              <h3 className="font-semibold text-gray-800">{user.name}</h3>
-              <p className="text-sm text-gray-500">{user.email}</p>
-              <span className="text-xs text-indigo-600 font-medium">{user.role}</span>
-            </div>
-            <button
-              onClick={() => setUsers(users.filter((u) => u.id !== user.id))}
-              className="text-red-500 text-sm hover:underline"
-            >
-              Remove
-            </button>
-          </div>
-        ))}
+      {/* EDIT USER */}
+      {editUser && (
+        <form onSubmit={handleUpdateUser} className="bg-white p-6 rounded-xl shadow-md border mb-6 space-y-4">
+          <h2 className="font-bold text-lg">Edit Admin</h2>
 
-        {filteredUsers.length === 0 && (
-          <p className="text-gray-500 text-center italic">No users found</p>
-        )}
-      </div>
+          <input className="border p-2 rounded w-full" value={editUser.name} onChange={(e) => setEditUser({ ...editUser, name: e.target.value })} />
+          <input className="border p-2 rounded w-full" value={editUser.email} onChange={(e) => setEditUser({ ...editUser, email: e.target.value })} />
+          <input type="password" className="border p-2 rounded w-full" placeholder="New password (optional)" onChange={(e) => setEditUser({ ...editUser, password: e.target.value })} />
+          <input className="border p-2 rounded w-full" value={editUser.phone} onChange={(e) => setEditUser({ ...editUser, phone: e.target.value })} />
+
+          <div className="relative" ref={dropdownRef}>
+            <input
+              className="w-full p-2 border rounded"
+              placeholder="Search project..."
+              value={projectSearch}
+              onChange={(e) => setProjectSearch(e.target.value)}
+              onFocus={() => setDropdownOpen(true)}
+            />
+
+            {dropdownOpen && (
+              <ul className="absolute z-50 bg-white border rounded w-full max-h-48 overflow-y-auto shadow">
+                {allProjects.map((p) => (
+                  <li key={p.id} className="p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => { setSelectedProject(p); setProjectSearch(p.name); setDropdownOpen(false); }}>
+                    {p.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="flex gap-3 mt-4">
+            <button className="bg-indigo-600 text-white px-4 py-2 rounded">Save Changes</button>
+            <button type="button" className="px-4 py-2 rounded border" onClick={() => setEditUser(null)}>Cancel</button>
+            <button type="button" className="bg-red-500 text-white px-4 py-2 rounded" onClick={handleDelete}>Delete Admin</button>
+          </div>
+        </form>
+      )}
+
+      {/* USER LIST */}
+      {!loading && !editUser && !showCreateForm && (
+        <div className="grid gap-4">
+          {users.map((user) => (
+            <div key={user.id} className="bg-white rounded-xl shadow-sm p-4 border cursor-pointer hover:bg-gray-50"
+              onClick={() => { setEditUser(user); setShowCreateForm(false); }}>
+              <h3 className="font-semibold">{user.name}</h3>
+              <p className="text-sm text-gray-500">{user.email}</p>
+              {user.project && <p className="text-xs text-gray-600 mt-1">Project: <b>{user.project.name ?? user.project}</b></p>}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

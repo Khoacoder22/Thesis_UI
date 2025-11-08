@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FolderKanban, Users, ChevronLeft, ChevronRight, LogOut } from "lucide-react";
+import { LayoutDashboard, FolderKanban, Users, ChevronLeft, ChevronRight, LogOut, User } from "lucide-react";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(true);
@@ -8,24 +8,29 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Lấy user từ localStorage khi component mount
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
-  const menus = [
+  // ✅ Role-based menu
+  const superAdminMenus = [
     { title: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/dashboard" },
     { title: "Project", icon: <FolderKanban size={22} />, path: "/project" },
     { title: "User", icon: <Users size={22} />, path: "/user" },
   ];
 
-  const handleLogout = () => {
-    // Xóa token localStorage nếu có
-    localStorage.removeItem("token");
+  const adminMenus = [
+    { title: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/dashboard-admin" },
+    { title: "Staff", icon: <Users size={22} />, path: "/staff" },
+    { title: "Profile", icon: <User size={22} />, path: "/profile" },
+  ];
 
-    // Chuyển hướng về trang login
+  // ✅ Chọn menu theo role
+  const menus = user?.role === "superadmin" ? superAdminMenus : adminMenus;
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate("/login");
   };
 
@@ -36,9 +41,13 @@ const Sidebar = () => {
       } bg-gradient-to-br from-indigo-600 via-blue-500 to-cyan-400 flex flex-col justify-between text-white shadow-xl transition-all duration-300`}
     >
       <div>
-        {/* Header */}
+        {/* ✅ Title thay đổi theo role */}
         <div className="flex items-center justify-between h-20 border-b border-white/30 px-4">
-          {open && <h1 className="text-2xl font-extrabold tracking-wide">Super Admin</h1>}
+          {open && (
+            <h1 className="text-2xl font-extrabold tracking-wide">
+              {user?.role === "super_admin" ? "Super Admin" : "Admin"}
+            </h1>
+          )}
           <button
             onClick={() => setOpen(!open)}
             className="p-2 rounded-full hover:bg-white/20 transition"
@@ -69,7 +78,6 @@ const Sidebar = () => {
 
       {/* Logout + User Info */}
       <div>
-        {/* Logout Button */}
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 w-full px-5 py-3 text-white/90 hover:bg-white/20 transition-all border-t border-white/30"
@@ -78,23 +86,20 @@ const Sidebar = () => {
           {open && <span className="font-medium text-sm">Logout</span>}
         </button>
 
-        {/* User Info */}
         <div className="p-5 border-t border-white/30 flex items-center gap-3">
           <img
             src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR81iX4Mo49Z3oCPSx-GtgiMAkdDop2uVmVvw&s"
             alt="User Avatar"
             className="w-10 h-10 rounded-full border-2 border-white"
           />
-           {open && (
+          {open && (
             <div>
-              <h3 className="font-semibold text-sm">
-                {user ? user.name : "Guest"}
-              </h3>
+              <h3 className="font-semibold text-sm">{user ? user.name : "Guest"}</h3>
               <p className="text-xs text-white/80">
-                {user ? user.role || "User" : ""}
-          </p>
-        </div>
-  )}
+                {user ? user.role : ""}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -11,6 +11,20 @@ const projectApi = {
   update: (id, data) => axiosClient.patch(`/projects/${id}`, data),
 
   delete: (id) => axiosClient.delete(`/projects/${id}`),
+
+  getUnassigned: (adminId, search = "") =>
+  axiosClient.post(`/projects/${adminId}/assign-project`, {
+      params: { search },
+    }),
+
+  getUnassigned: () => axiosClient.get(`/projects/unassigned/projects`),
+
+  assignToUser: (userId, projectName) =>
+  axiosClient.post(`/projects/assign-project`, {
+    userId,
+    projectName,
+  }),
+
 };
 
 export default projectApi;

@@ -81,21 +81,28 @@ const ProjectPage = () => {
   };
 
   // DELETE
-  const handleDelete = async (id) => {
-    try {
-      await projectApi.delete(id);
-      toast.success("Project deleted successfully!");
-      fetchProjects(pagination.page, search);
-      // Xóa xong thì đóng form
-      setShowForm(false);
-      setEditMode(false);
-      setEditId(null);
-    } catch (err) {
-      console.error("Delete error:", err);
-      const message = err.response?.data?.message || "Failed to delete project!";
-      toast.error(message);
-    }
-  };
+  const handleDelete = async () => {
+  if (!editId) {
+    toast.error("Project ID is missing!");
+    return;
+  }
+
+  try {
+    await projectApi.delete(editId);
+    toast.success("Project deleted successfully!");
+
+    fetchProjects(pagination.page, search);
+
+    // Reset form state
+    setShowForm(false);
+    setEditMode(false);
+    setEditId(null);
+  } catch (err) {
+    console.error("Delete error:", err);
+    const message = err.response?.data?.message || "Failed to delete project!";
+    toast.error(message);
+  }
+};
 
   return (
     <div className="flex-1 p-8 bg-gray-50 min-h-screen">

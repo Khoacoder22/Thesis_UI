@@ -62,7 +62,7 @@ const ProjectForm = ({
             {editMode && (
               <button
                 type="button"
-                onClick={() => onDelete(formData.id)}
+                onClick={onDelete}
                 className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-semibold"
               >
                 Delete
