@@ -36,11 +36,14 @@ const Login = () => {
   };
 
   return (
-  <div className="min-h-screen flex items-center justify-center 
-        bg-gradient-to-r from-indigo-600 via-blue-500 to-cyan-400
-    bg-[length:400%_400%] animate-gradientMove">     
+  <div className="min-h-screen flex items-center justify-center  bg-gradient-to-r from-indigo-600 via-blue-500 to-cyan-400 bg-[length:400%_400%] animate-gradientMove">     
    <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
         <div className="text-center mb-6">
+          <img 
+            src="/Qr.png" 
+            alt="QR Logo" 
+            className="mx-auto w-20 h-20 mb-3" 
+          />
           <h1 className="text-3xl font-extrabold text-indigo-600 tracking-wide">
             QR Smart Queue
           </h1>
