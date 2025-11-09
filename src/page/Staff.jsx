@@ -20,7 +20,6 @@ const Staff = () => {
       setStaffs(res.data?.data || []);
     } catch (err) {
       console.log(err);
-      toast.error("Failed to load staff list");
     }
   };
 

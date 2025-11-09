@@ -4,6 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import SearchBar from "../components/SearchbarComponent";
 import ProjectForm from "../components/ProjectForm";
 import projectApi from "../axios/projectAPI";
+import Pagination from "../components/pagination";
 
 const ProjectPage = () => {
   const [search, setSearch] = useState("");
@@ -162,37 +163,18 @@ const ProjectPage = () => {
 
         {/* Pagination */}
         <div className="flex justify-center items-center mt-8 gap-4">
-          <button
-            disabled={!pagination.hasPrev}
-            onClick={() =>
-              setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
-            }
-            className={`px-4 py-2 rounded-lg ${
-              !pagination.hasPrev
-                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                : "bg-indigo-600 text-white hover:bg-indigo-700"
-            }`}
-          >
-            Prev
-          </button>
-
-          <span className="text-gray-700 font-medium">
-            Page {pagination.page} / {pagination.totalPages}
-          </span>
-
-          <button
-            disabled={!pagination.hasNext}
-            onClick={() =>
-              setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
-            }
-            className={`px-4 py-2 rounded-lg ${
-              !pagination.hasNext
-                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                : "bg-indigo-600 text-white hover:bg-indigo-700"
-            }`}
-          >
-            Next
-          </button>
+          <Pagination
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          hasPrev={pagination.hasPrev}
+          hasNext={pagination.hasNext}
+          onPrev={() =>
+            setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
+          }
+          onNext={() =>
+            setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
+          }
+          />
         </div>
       </div>
 
