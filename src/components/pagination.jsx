@@ -1,4 +1,3 @@
-import React from 'react'
 
 const pagination = ({page, totalPages, hasPrev, hasNext, onPrev, onNext}) => {
   return (

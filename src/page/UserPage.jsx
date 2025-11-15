@@ -33,17 +33,17 @@ const UserPage = () => {
 
   const dropdownRef = useRef(null);
 
-  // ✅ Fetch Users with Correct Pagination
+  //  Fetch Users with Correct Pagination
   const fetchUsers = async (page = 1, keyword = "") => {
     try {
       setLoading(true);
-      const res = await userApi.getAll(page, keyword, 5);
+      const res = await userApi.getAll(page, keyword, 4);
 
       console.log("PAGINATION RESPONSE:", res.data.pagination);
 
       let users = res.data?.data || [];
 
-      // ✅ Attach project name if needed
+      //  Attach project name if needed
       users = await Promise.all(
         users.map(async (u) => {
           if (u.project_id && !u.project) {
@@ -60,7 +60,7 @@ const UserPage = () => {
 
       setUsers(users);
 
-      // ✅ Fix pagination mapping
+      //  Fix pagination mapping
       if (res.data?.pagination) {
         const p = res.data.pagination;
 
@@ -91,18 +91,18 @@ const UserPage = () => {
     }
   };
 
-  // ✅ Runs when page or search changes
+  //  Runs when page or search changes
   useEffect(() => {
     fetchUsers(pagination.page, search);
   }, [pagination.page, search]);
 
-  // ✅ Reset to page 1 when search changed
+  //  Reset to page 1 when search changed
   const handleSearchChange = (val) => {
     setSearch(val);
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
-  /** ✅ Project Selector Load */
+  /**  Project Selector Load */
   const loadProjects = async () => {
     try {
       const res = await projectApi.getUnassigned(projectSearch);
@@ -118,7 +118,7 @@ const UserPage = () => {
     return () => clearTimeout(t);
   }, [projectSearch, dropdownOpen]);
 
-  /** ✅ Add user */
+  /**  Add user */
   const handleAddUser = async (e) => {
     e.preventDefault();
     try {
@@ -133,9 +133,8 @@ const UserPage = () => {
     }
   };
 
-  /** ✅ Delete user */
+  /**  Delete user */
   const handleDelete = async () => {
-    if (!window.confirm("Delete this admin?")) return;
     try {
       await userApi.deleteUser(editUser.id);
       await fetchUsers();
@@ -146,7 +145,7 @@ const UserPage = () => {
     }
   };
 
-  /** ✅ Update user */
+  /**  Update user */
   const handleUpdateUser = async (e) => {
     e.preventDefault();
     try {
@@ -165,7 +164,7 @@ const UserPage = () => {
     }
   };
 
-  // ✅ Close dropdown on outside click
+  //  Close dropdown on outside click
   useEffect(() => {
     const handleOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -194,7 +193,7 @@ const UserPage = () => {
         </button>
       </div>
 
-      {/* ✅ Create User */}
+      {/*  Create User */}
       {showCreateForm && !editUser && (
         <form
           onSubmit={handleAddUser}
@@ -262,7 +261,7 @@ const UserPage = () => {
         </form>
       )}
 
-      {/* ✅ Edit User */}
+      {/*  Edit User */}
       {editUser && (
         <form
           onSubmit={handleUpdateUser}
@@ -300,7 +299,7 @@ const UserPage = () => {
             }
           />
 
-          {/* ✅ Project Dropdown */}
+          {/*  Project Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <input
               className="w-full p-2 border rounded"
@@ -351,7 +350,7 @@ const UserPage = () => {
         </form>
       )}
 
-      {/* ✅ User List */}
+      {/*  User List */}
       {!loading && !editUser && !showCreateForm && (
         <div className="grid gap-4">
           {users.map((user) => (
@@ -375,8 +374,8 @@ const UserPage = () => {
         </div>
       )}
 
-      {/* ✅ Pagination */}
-      <div className="flex justify-center items-center mt-8 gap-4">
+      {/*  Pagination */}
+      <div className="mt-8">
         <Pagination
           page={pagination.page}
           totalPages={pagination.totalPages}

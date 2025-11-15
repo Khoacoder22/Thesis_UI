@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FolderKanban, Users, ChevronLeft, ChevronRight, LogOut, User } from "lucide-react";
+import { LayoutDashboard, FolderKanban, Users, ChevronLeft, ChevronRight, LogOut, Wrench, User, Ticket, CheckLineIcon } from "lucide-react";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(true);
@@ -8,11 +8,11 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = sessionStorage.getItem("user");
     if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
-  // ✅ Role-based menu
+  //  Role-based menu
   const superAdminMenus = [
     { title: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/dashboard" },
     { title: "Project", icon: <FolderKanban size={22} />, path: "/project" },
@@ -22,15 +22,18 @@ const Sidebar = () => {
   const adminMenus = [
     { title: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/dashboard-admin" },
     { title: "Staff", icon: <Users size={22} />, path: "/staff" },
+    { title: "Service", icon: <Wrench size={22} />, path: "/service" },
     { title: "Profile", icon: <User size={22} />, path: "/profile" },
+    { title: "Tickets", icon: <Ticket size={22} />, path: "/tickets" },
+    { title: "Line", icon: <CheckLineIcon size={22} />, path: "/line" }
   ];
 
-  // ✅ Chọn menu theo role
+  //  Chọn menu theo role
   const menus = user?.role === "superadmin" ? superAdminMenus : adminMenus;
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
     navigate("/login");
   };
 
@@ -41,11 +44,11 @@ const Sidebar = () => {
       } bg-gradient-to-br from-indigo-600 via-blue-500 to-cyan-400 flex flex-col justify-between text-white shadow-xl transition-all duration-300`}
     >
       <div>
-        {/* ✅ Title thay đổi theo role */}
+        {/* Title  */}
         <div className="flex items-center justify-between h-20 border-b border-white/30 px-4">
           {open && (
             <h1 className="text-2xl font-extrabold tracking-wide">
-              {user?.role === "super_admin" ? "Super Admin" : "Admin"}
+              {user?.role === "superadmin" ? "Super Admin" : "Admin"}
             </h1>
           )}
           <button
@@ -63,11 +66,7 @@ const Sidebar = () => {
               <NavLink
                 to={menu.path}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 ${
-                    isActive ? "bg-white/30 shadow-md" : "hover:bg-white/10"
-                  }`
-                }
-              >
+                  `flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 ${ isActive ? "bg-white/30 shadow-md" : "hover:bg-white/10"}`}>
                 {menu.icon}
                 {open && <span className="text-base font-medium">{menu.title}</span>}
               </NavLink>

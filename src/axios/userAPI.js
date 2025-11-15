@@ -1,7 +1,7 @@
 import axiosClient from "./axiosClient";
 
 const userApi = {
-  getAll: (page = 1, keyword = "", limit = 5) =>
+  getAll: (page = 1, keyword = "", limit = 4) =>
   axiosClient.get(`/users?page=${page}&search=${keyword}&limit=${limit}`),
   
   createAdmin: (data) => axiosClient.post(`/users/createAdmin`, data),

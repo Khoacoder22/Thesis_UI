@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import userApi from "../axios/userAPI";
-import { toast } from "react-toastify";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -13,7 +12,7 @@ const Profile = () => {
       setProject(res.data.data.project);
 
       if (res.data.data.project?.slug) {
-        localStorage.setItem("projectSlug", res.data.data.project.slug);
+        sessionStorage.setItem("projectSlug", res.data.data.project.slug);
       }
     } catch (err) {
         console.log("err" + err);

@@ -20,8 +20,8 @@ const Login = () => {
       const data = res.data;
 
       if (data.status === "success") {
-        localStorage.setItem("token", data.data.token);
-        localStorage.setItem("user", JSON.stringify(data.data.user));
+        sessionStorage.setItem("token", data.data.token);
+        sessionStorage.setItem("user", JSON.stringify(data.data.user));
 
         navigate("/dashboard", { replace: true });
       } else {
