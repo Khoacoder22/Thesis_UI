@@ -12,7 +12,7 @@ const Sidebar = () => {
     if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
-  //  Role-based menu
+  //  Role menu
   const superAdminMenus = [
     { title: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/dashboard" },
     { title: "Project", icon: <FolderKanban size={22} />, path: "/project" },
@@ -28,8 +28,26 @@ const Sidebar = () => {
     { title: "Line", icon: <CheckLineIcon size={22} />, path: "/line" }
   ];
 
+  const staffMenus = [
+    { title: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/dashboard-admin" },
+    { title: "Service", icon: <Wrench size={22} />, path: "/service" },
+    { title: "Tickets", icon: <Ticket size={22} />, path: "/tickets" },
+    { title: "Profile", icon: <User size={22} />, path: "/profile" },
+    { title: "Line", icon: <CheckLineIcon size={22} />, path: "/line" }
+  ]
+
+
   //  Chọn menu theo role
-  const menus = user?.role === "superadmin" ? superAdminMenus : adminMenus;
+  let menus = [];
+
+    if (user?.role === "superadmin") {
+      menus = superAdminMenus;
+    } else if (user?.role === "admin") {
+      menus = adminMenus;
+    } else if (user?.role === "staff") {
+      menus = staffMenus;
+    }
+
 
   const handleLogout = () => {
     sessionStorage.removeItem("token");
@@ -48,7 +66,11 @@ const Sidebar = () => {
         <div className="flex items-center justify-between h-20 border-b border-white/30 px-4">
           {open && (
             <h1 className="text-2xl font-extrabold tracking-wide">
-              {user?.role === "superadmin" ? "Super Admin" : "Admin"}
+              {open && (
+                <h1 className="text-2xl font-extrabold tracking-wide capitalize">
+                  {user?.role || "User"}
+                </h1>
+              )}
             </h1>
           )}
           <button
