@@ -20,7 +20,7 @@ const Sidebar = () => {
   ];
 
   const adminMenus = [
-    { title: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/dashboard-admin" },
+    { title: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/dashboard" },
     { title: "Staff", icon: <Users size={22} />, path: "/staff" },
     { title: "Service", icon: <Wrench size={22} />, path: "/service" },
     { title: "Profile", icon: <User size={22} />, path: "/profile" },
@@ -29,7 +29,7 @@ const Sidebar = () => {
   ];
 
   const staffMenus = [
-    { title: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/dashboard-admin" },
+    { title: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/dashboard" },
     { title: "Service", icon: <Wrench size={22} />, path: "/service" },
     { title: "Tickets", icon: <Ticket size={22} />, path: "/tickets" },
     { title: "Profile", icon: <User size={22} />, path: "/profile" },
@@ -65,12 +65,8 @@ const Sidebar = () => {
         {/* Title  */}
         <div className="flex items-center justify-between h-20 border-b border-white/30 px-4">
           {open && (
-            <h1 className="text-2xl font-extrabold tracking-wide">
-              {open && (
-                <h1 className="text-2xl font-extrabold tracking-wide capitalize">
-                  {user?.role || "User"}
-                </h1>
-              )}
+            <h1 className="text-2xl font-extrabold tracking-wide capitalize">
+              {user?.role || "User"}
             </h1>
           )}
           <button

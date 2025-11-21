@@ -40,7 +40,7 @@ const Layout = () => {
   return (
     <div className="flex">
       {!hideSidebar && <Sidebar />}
-      <div className="flex-1 bg-gray-50 overflow-y-auto">
+      <div className="flex-1 bg-gray-50">
         <Routes>
           {/* Static routes */}
           <Route path="/" element={<DashboardPage />} />
