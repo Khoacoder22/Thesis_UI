@@ -2,11 +2,9 @@ import { useEffect, useState } from "react";
 import lineAPI from "../axios/lineAPI";
 import serviceApi from "../axios/serviceApi";
 import { toast } from "react-toastify";
-import { motion, AnimatePresence } from "framer-motion";
 import { Edit2, Trash2, Plus, X, Layers, CornerDownRight } from "lucide-react"; 
 
 const LinePage = () => {
-  // --- GIỮ NGUYÊN LOGIC GỐC ---
   const [lines, setLines] = useState([]);
   const [services, setServices] = useState([]);
   const [formData, setFormData] = useState({ name: "", service_id: "" });
@@ -15,7 +13,7 @@ const LinePage = () => {
 
   const fetchServices = async () => {
     try {
-      const res = await serviceApi.getService(1, "");
+      const res = await serviceApi.getService(1, "", 100);
       setServices(res.data.data);
     } catch (err) {
       toast.error("Cannot load services!");
@@ -38,8 +36,6 @@ const LinePage = () => {
 
   useEffect(() => {
     fetchLines();
-    // UX IMPROVEMENT: Nếu đang tạo mới (không phải edit),
-    // tự động set service_id của form theo filter đang chọn.
     if (!editingId && selectedServiceId) {
       setFormData((prev) => ({ ...prev, service_id: selectedServiceId }));
     }
@@ -58,8 +54,7 @@ const LinePage = () => {
         toast.success("Line created!");
       }
 
-      // Reset form logic
-      setFormData({ name: "", service_id: selectedServiceId || "" }); // Giữ lại service id nếu đang filter
+      setFormData({ name: "", service_id: selectedServiceId || "" });
       setEditingId(null);
       if (selectedServiceId === formData.service_id) fetchLines();
     } catch {
@@ -70,35 +65,31 @@ const LinePage = () => {
   const handleEdit = (line) => {
     setFormData({ name: line.name, service_id: line.service_id });
     setEditingId(line.id);
-    // UX: Scroll to form on mobile, focus input logic could be added here
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this line?")) return; // UX: Safety check
+    if (!window.confirm("Are you sure you want to delete this line?")) return;
     try {
       await lineAPI.deleteLine(id);
       toast.success("Line deleted!");
       fetchLines();
-      // Nếu đang edit đúng dòng bị xóa thì reset form
       if (editingId === id) handleCancelEdit();
     } catch {
       toast.error("Cannot delete line");
     }
   };
 
-  // New Helper for UX: Cancel Edit
   const handleCancelEdit = () => {
     setEditingId(null);
     setFormData({ name: "", service_id: selectedServiceId || "" });
   };
 
-  // --- PHẦN UI ĐƯỢC THIẾT KẾ LẠI ---
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-slate-50 overflow-hidden">
       
-      {/* LEFT COLUMN: LIST & FILTER (Chiếm phần lớn diện tích) */}
+      {/* LEFT COLUMN: LIST & FILTER */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        {/* Header & Filter Area */}
+        {/* Header & Filter */}
         <div className="p-6 bg-white border-b border-slate-200 shadow-sm z-10">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
@@ -125,7 +116,7 @@ const LinePage = () => {
           </div>
         </div>
 
-        {/* Main List Area (Scrollable) */}
+        {/* Main List Area */}
         <div className="flex-1 overflow-y-auto p-6">
           {!selectedServiceId ? (
             <div className="h-full flex flex-col items-center justify-center text-slate-400">
@@ -137,57 +128,50 @@ const LinePage = () => {
               No lines found for this service. Create one!
             </div>
           ) : (
-            <motion.div layout className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              <AnimatePresence>
-                {lines.map((line) => (
-                  <motion.div
-                    layout
-                    key={line.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    whileHover={{ y: -4, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
-                    className={`bg-white p-5 rounded-xl border transition-all relative group ${
-                      editingId === line.id ? "border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50" : "border-slate-200 shadow-sm"
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="pr-8">
-                        <h3 className={`font-bold text-lg truncate ${editingId === line.id ? "text-indigo-700" : "text-slate-800"}`}>
-                          {line.name}
-                        </h3>
-                        <span className="inline-block mt-1 px-2 py-0.5 bg-slate-100 text-slate-500 text-xs rounded-full border border-slate-200">
-                           {services.find((s) => s.id === line.service_id)?.name || "Unknown Service"}
-                        </span>
-                      </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {lines.map((line) => (
+                <div
+                  key={line.id}
+                  className={`bg-white p-5 rounded-xl border transition-all relative group hover:shadow-md hover:-translate-y-0.5 ${
+                    editingId === line.id ? "border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50" : "border-slate-200 shadow-sm"
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="pr-8">
+                      <h3 className={`font-bold text-lg truncate ${editingId === line.id ? "text-indigo-700" : "text-slate-800"}`}>
+                        {line.name}
+                      </h3>
+                      <span className="inline-block mt-1 px-2 py-0.5 bg-slate-100 text-slate-500 text-xs rounded-full border border-slate-200">
+                         {services.find((s) => s.id === line.service_id)?.name || "Unknown Service"}
+                      </span>
                     </div>
+                  </div>
 
-                    {/* Action Buttons (Visible on Hover or Always on Touch) */}
-                    <div className="mt-4 flex justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => handleEdit(line)}
-                        className="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
-                        title="Edit"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(line.id)}
-                        className="p-2 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
+                  {/* Action Buttons */}
+                  <div className="mt-4 flex justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => handleEdit(line)}
+                      className="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+                      title="Edit"
+                    >
+                      <Edit2 size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(line.id)}
+                      className="p-2 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
 
-      {/* RIGHT COLUMN: FORM (Cố định, Sticky) */}
+      {/* RIGHT COLUMN: FORM */}
       <div className="w-full lg:w-96 bg-white border-t lg:border-t-0 lg:border-l border-slate-200 shadow-xl z-20 flex flex-col">
         <div className="p-6 bg-slate-50 border-b border-slate-100">
           <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">

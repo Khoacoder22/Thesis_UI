@@ -3,8 +3,7 @@ import {
   CheckCircle, 
   XCircle, 
   PhoneCall, 
-  User, 
-  Search, 
+  User,
   ChevronLeft, 
   ChevronRight, 
   Layers, 
@@ -41,11 +40,27 @@ const TicketPage = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // 1. Load Services
+  // useEffect(() => {
+  //   const loadServices = async () => {
+  //     try {
+  //       const res = await serviceApi.getService();
+  //       setServices(res.data.data || []);
+  //     } catch (err) {
+  //       toast.error("Cannot load services");
+  //     }
+  //   };
+  //   loadServices();
+  // }, []);
+
   useEffect(() => {
     const loadServices = async () => {
       try {
-        const res = await serviceApi.getService();
-        setServices(res.data.data || []);
+        // SỬA DÒNG NÀY: Truyền tham số thứ 3 là limit lớn (ví dụ 100)
+        const res = await serviceApi.getService(1, "", 100);
+        
+        // Kiểm tra kỹ cấu trúc data trả về (thường nằm trong data hoặc data.services)
+        const list = res.data.data?.services || res.data.data || [];
+        setServices(list);
       } catch (err) {
         toast.error("Cannot load services");
       }

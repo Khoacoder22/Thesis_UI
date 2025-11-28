@@ -41,7 +41,7 @@ const Store = () => {
 
   if (loading)
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+      <div className="flex justify-center items-center h-[100dvh] bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mx-auto mb-4"></div>
           <p className="text-lg font-semibold text-gray-600">Loading Store...</p>
@@ -50,8 +50,13 @@ const Store = () => {
     );
 
   return (
-    <div className="min-h-screen bg-gray-50 w-full font-sans">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
+    // THAY ĐỔI 1: Sử dụng h-[100dvh] để cố định chiều cao bằng màn hình thiết bị
+    // overflow-y-auto: Cho phép cuộn nội dung bên trong div này
+    <div className="h-[100dvh] bg-gray-50 w-full font-sans overflow-y-auto scroll-smooth">
+      
+      {/* THAY ĐỔI 2: Thêm pb-24 (padding bottom) để item cuối cùng không bị sát đáy màn hình */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16 pb-24">
+        
         <div className="text-center mb-10 sm:mb-16 animate-fade-in-down">
           <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-gray-800">
             Welcome to <span className="text-blue-600">{projectName}</span>
