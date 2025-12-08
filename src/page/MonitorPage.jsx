@@ -96,7 +96,7 @@ const LineCard = ({ line, onOpenPiP, onClick }) => {
             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-3">
               <Layers className="text-gray-300" size={32} />
             </div>
-            <span className="text-gray-400 text-sm font-medium">Đang trống</span>
+            <span className="text-gray-400 text-sm font-medium">Empty</span>
           </>
         )}
       </div>
@@ -104,7 +104,7 @@ const LineCard = ({ line, onOpenPiP, onClick }) => {
       {/* Card Footer - Waiting Queue */}
       <div className="bg-gray-50 p-3 border-t border-gray-100">
         <div className="flex justify-between items-center mb-3 px-1">
-          <span className="text-xs font-semibold text-gray-500 uppercase">Hàng chờ</span>
+          <span className="text-xs font-semibold text-gray-500 uppercase">Waiting queue</span>
           <span className="bg-gray-200 text-gray-600 text-xs font-bold px-2 py-0.5 rounded">{stats.waiting}</span>
         </div>
 
@@ -121,7 +121,7 @@ const LineCard = ({ line, onOpenPiP, onClick }) => {
         )}
 
         <button className="w-full py-2 flex items-center justify-center gap-1 text-sm font-medium text-blue-600 bg-white border border-blue-100 rounded-lg hover:bg-blue-50 transition-colors shadow-sm">
-          Vào quản lý <ChevronRight size={16} />
+          Manage <ChevronRight size={16} />
         </button>
       </div>
     </div>
@@ -299,7 +299,7 @@ const MonitorPage = () => {
           {/* Services List */}
           <div className="px-4">
             <p className={`text-xs font-semibold text-gray-400 mb-2 ${!isSidebarOpen && 'hidden'}`}>
-              DANH SÁCH DỊCH VỤ
+                Services list
             </p>
             <div className="space-y-1">
               {services.map((svc) => (
