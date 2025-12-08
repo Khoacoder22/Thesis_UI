@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FolderKanban, Users, ChevronLeft, ChevronRight, LogOut, Wrench, User, Ticket, CheckLineIcon } from "lucide-react";
+import { LayoutDashboard, FolderKanban, Users, ChevronLeft, ChevronRight, LogOut, Wrench, User, Ticket, CheckLineIcon, AccessibilityIcon} from "lucide-react";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(true);
@@ -24,14 +24,15 @@ const Sidebar = () => {
     { title: "Staff", icon: <Users size={22} />, path: "/staff" },
     { title: "Service", icon: <Wrench size={22} />, path: "/service" },
     { title: "Profile", icon: <User size={22} />, path: "/profile" },
-    { title: "Tickets", icon: <Ticket size={22} />, path: "/tickets" },
-    { title: "Line", icon: <CheckLineIcon size={22} />, path: "/line" }
+    // { title: "Tickets", icon: <Ticket size={22} />, path: "/tickets" },
+    { title: "Line", icon: <CheckLineIcon size={22} />, path: "/line" },
+    { title: "Monitor", icon: <AccessibilityIcon size={22} />, path: "/monitorPage" },
   ];
 
   const staffMenus = [
     { title: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/dashboard" },
     { title: "Service", icon: <Wrench size={22} />, path: "/service" },
-    { title: "Tickets", icon: <Ticket size={22} />, path: "/tickets" },
+    // { title: "Tickets", icon: <Ticket size={22} />, path: "/tickets" },
     { title: "Profile", icon: <User size={22} />, path: "/profile" },
     { title: "Line", icon: <CheckLineIcon size={22} />, path: "/line" }
   ]

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Login from "./page/Login";
 import Sidebar from "./components/Sidebar";
 import DashboardPage from "./page/DashboardPage";
@@ -14,24 +14,25 @@ import TicketDetail from "./page/TicketDetail";
 import TicketForm from "./page/TicketForm";
 import LinePage from "./page/linePage";
 import "react-toastify/dist/ReactToastify.css";
+import MonitorPage from "./page/MonitorPage";
+import CounterPage from "./page/CounterPage";
 
 const Layout = () => {
   const location = useLocation();
 
-  // danh sách các route muốn ẩn sidebar
+  // list want to hide sidebar
   const pathsWithoutSidebar = [
     "/login",
     "/projects/:slug",
     "/services/:serviceId",
-    "/ticket/:ticketId"
+    "/ticket/:ticketId",
+    "/monitorPage"
   ];
 
   const hideSidebar = pathsWithoutSidebar.some((path) => {
     if (!path.includes(":")) {
-      // static path
       return location.pathname === path;
     } else {
-      // dynamic path: check base path trước dấu ":"
       const basePath = path.split("/:")[0];
       return location.pathname.startsWith(basePath) && location.pathname !== "/tickets";
     }
@@ -42,8 +43,10 @@ const Layout = () => {
       {!hideSidebar && <Sidebar />}
       <div className="flex-1 bg-gray-50">
         <Routes>
+          {/* Redirect root "/" → /login instantly */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
           {/* Static routes */}
-          <Route path="/" element={<DashboardPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/project" element={<ProjectPage />} />
           <Route path="/user" element={<UserPage />} />
@@ -53,7 +56,8 @@ const Layout = () => {
           <Route path="/service" element={<Service />} />
           <Route path="/tickets" element={<TicketPage />} />
           <Route path="/line" element={<LinePage />} />
-
+          <Route path="/monitorPage" element={<MonitorPage/>}/>
+          <Route path="/counter" element={<CounterPage />} />
           {/* Dynamic routes */}
           <Route path="/projects/:slug" element={<Store />} />
           <Route path="/services/:serviceId" element={<TicketForm />} />
